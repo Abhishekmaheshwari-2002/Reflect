@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import aj from "@/lib/arcjet";
 import { db } from "@/lib/prisma";
 import { request } from "@arcjet/next";
@@ -16,7 +16,7 @@ export const createCollection = async (data) => {
         // Check rate limit
         const decision = await aj.protect(req, {
             userId,
-            requested: 1,// Specify how many tokens to consume
+            requested: 1, // Specify how many tokens to consume
         });
 
         if (decision.isDenied()) {
@@ -55,7 +55,7 @@ export const createCollection = async (data) => {
     } catch (error) {
         throw new Error(error.message);
     }
-}
+};
 
 export const getCollections = async () => {
     const { userId } = await auth();
@@ -67,6 +67,8 @@ export const getCollections = async () => {
         },
     });
     if (!user) {
+        console.log(userId);
+        // console.log(clerkUserId);
         throw new Error("User not found");
     }
 
@@ -76,36 +78,13 @@ export const getCollections = async () => {
             userId: user.id,
         },
         orderBy: {
-            createdAt: "desc"
+            createdAt: "desc",
         },
     });
     return collections;
-}
+};
 
-export const getCollection = async (collectionId) => {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
-    const user = await db.user.findUnique({
-        where: {
-            clerkUserId: userId,
-        },
-    });
-    if (!user) {
-        throw new Error("User not found");
-    }
-
-    // Fetch the user's collections
-    const collections = await db.collection.findUnique({
-        where: {
-            userId: user.id,
-            id: collectionId,
-        },
-    });
-    return collections;
-}
-
-export const deleteCollection = async (collectionId) => {
+export const deleteCollection = async (id) => {
     try {
         const { userId } = await auth();
         if (!userId) throw new Error("Unauthorized");
@@ -121,22 +100,45 @@ export const deleteCollection = async (collectionId) => {
         // Check if collection exists and belongs to user
         const collection = await db.collection.findFirst({
             where: {
+                id,
                 userId: user.id,
-                id: collectionId,
+                // id: collectionId,
             },
         });
-
 
         if (!collection) throw new Error("Collection not found");
         // Delete the collection (entries will be cascade deleted)
         await db.collection.delete({
             where: {
-                id: collectionId,
-
+                // id: collectionId,
+                id,
             },
         });
         return true;
     } catch (error) {
         throw new Error(error.message);
     }
-}
+};
+
+// export const getCollection = async (collectionId) => {
+//     const { userId } = await auth();
+//     if (!userId) throw new Error("Unauthorized");
+
+//     const user = await db.user.findUnique({
+//         where: {
+//             clerkUserId: userId,
+//         },
+//     });
+//     if (!user) {
+//         throw new Error("User not found");
+//     }
+
+//     // Fetch the user's collections
+//     const collections = await db.collection.findUnique({
+//         where: {
+//             userId: user.id,
+//             id: collectionId,
+//         },
+//     });
+//     return collections;
+// }

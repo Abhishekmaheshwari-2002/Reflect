@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { deleteCollection } from "@/actions/collection";
-import useFetch from "@/hooks/use-fetch";
+import useFetch from "@/hooks/useFetch";
 import { useEffect } from "react";
 
 const DeleteCollectionDialog = ({ collection, entriesCount = 0 }) => {
